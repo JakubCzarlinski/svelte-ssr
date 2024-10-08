@@ -108,7 +108,7 @@ function compileAll(
   componentPath: string,
   compilePath: string,
 ) {
-  const promiseArray: Promise<any>[] = [];
+  const promiseArray: Promise<boolean>[] = [];
   for (let i = 0; i < svelteFiles.length; i++) {
     const file = svelteFiles[i];
     const filenameWitoutExt = file.split(".")[0];

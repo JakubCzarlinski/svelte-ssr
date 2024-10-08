@@ -28,3 +28,5 @@ node_modules
 *.dll
 *.so
 *.dylib
+
+tsconfig.json

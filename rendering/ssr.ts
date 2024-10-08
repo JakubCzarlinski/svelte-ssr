@@ -2,7 +2,7 @@ import purgecss from "@fullhuman/postcss-purgecss";
 import resolve from "@rollup/plugin-node-resolve";
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import autoprefixer from "autoprefixer";
-import { readFileSync, writeFile } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 import {
   preprocess,
@@ -122,7 +122,10 @@ export async function compileForSsr(
     outPath.replace(compilePath, ""),
   );
 
-  await writeFile(outPath, js.code, () => {});
+  return new Promise<boolean>((resolve) => {
+    writeFileSync(outPath, js.code);
+    resolve(true);
+  });
 }
 
 const headTagRegex = /<[^>]+>/g;
