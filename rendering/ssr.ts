@@ -1,5 +1,3 @@
-import { compileSvelte } from "@/rendering/compile.ts";
-import { removeCSR } from "@/rendering/filter.ts";
 import purgecss from "@fullhuman/postcss-purgecss";
 import resolve from "@rollup/plugin-node-resolve";
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte";
@@ -16,6 +14,8 @@ import { render } from "svelte/server";
 import type { Config } from "tailwindcss";
 import tailwindcss from "tailwindcss";
 import { defineConfig, type Plugin } from "vite";
+import { compileSvelte } from "./compile.ts";
+import { removeCSR } from "./filter.ts";
 
 const svelteConfig = svelte({
   compilerOptions: { modernAst: true },

@@ -16,7 +16,7 @@
     "checkJs": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*": ["./*"]
     },
