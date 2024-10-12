@@ -18,13 +18,14 @@ import path from "path";
 import type { AST, CompileOptions, CompileResult } from "svelte/compiler";
 import { walk as zimmerframe_walk } from "zimmerframe";
 
-const importFormat = /@\/src\/lib\/([a-zA-Z0-9_\/]+)\.(svelte)(?!\.)/g;
-const importFormatKeepExt = /@\/src\/lib\/([a-zA-Z0-9_\/]+)\.(mjs|cjs|js)/g;
+const importFormat = /@\/([a-zA-Z0-9_\/]+)\.(svelte)(?!\.)/g;
+const importFormatKeepExt = /@\/([a-zA-Z0-9_\/]+)\.(mjs|cjs|js)/g;
 
 export function compileSvelte(
   source: string,
   options: CompileOptions,
   localPath: string,
+  componentPath: string,
 ): CompileResult {
   reset_warning_filter(options.warningFilter);
   const validated = validate_component_options(options, "");
@@ -41,7 +42,7 @@ export function compileSvelte(
     customElementOptions,
   };
 
-  parsed = replaceImports(parsed, localPath);
+  parsed = replaceImports(parsed, localPath, componentPath);
 
   // @ts-ignore
   if (parsed.metadata.ts) {
@@ -84,7 +85,11 @@ function to_public_ast(ast: any) {
   });
 }
 
-function replaceImports(ast: any, localPath: string): any {
+function replaceImports(
+  ast: any,
+  localPath: string,
+  componentPath: string,
+): any {
   return estree_walk(ast, {
     // @ts-ignore
     enter(node, _parent) {
@@ -97,26 +102,46 @@ function replaceImports(ast: any, localPath: string): any {
           node.source.value = node.source.value.replace(
             importFormat,
             (_: string, filepath: string, _ext: string) => {
-              return formatRelativePath(filepath, localPath, "js");
+              return formatRelativePath(
+                filepath,
+                localPath,
+                "js",
+                componentPath,
+              );
             },
           );
           node.source.raw = node.source.raw.replace(
             importFormat,
             (_: string, filepath: string, _ext: string) => {
-              return formatRelativePath(filepath, localPath, "js");
+              return formatRelativePath(
+                filepath,
+                localPath,
+                "js",
+                componentPath,
+              );
             },
           );
 
           node.source.value = node.source.value.replace(
             importFormatKeepExt,
             (_: string, filepath: string, ext: string) => {
-              return formatRelativePath(filepath, localPath, ext);
+              return formatRelativePath(
+                filepath,
+                localPath,
+                ext,
+                componentPath,
+              );
             },
           );
           node.source.raw = node.source.raw.replace(
             importFormatKeepExt,
             (_: string, filepath: string, ext: string) => {
-              return formatRelativePath(filepath, localPath, ext);
+              return formatRelativePath(
+                filepath,
+                localPath,
+                ext,
+                componentPath,
+              );
             },
           );
         } else {
@@ -135,9 +160,16 @@ function replaceImports(ast: any, localPath: string): any {
   });
 }
 
-function formatRelativePath(filepath: string, localPath: string, ext: string) {
+function formatRelativePath(
+  filepath: string,
+  localPath: string,
+  ext: string,
+  componentPath: string,
+) {
   const relativePath = path
     .relative(path.dirname(localPath), path.join(filepath))
-    .replaceAll(path.sep, path.posix.sep);
+    .replaceAll(path.sep, path.posix.sep)
+    .replaceAll(componentPath, "");
+
   return `./${relativePath}.${ext}`;
 }

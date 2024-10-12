@@ -83,6 +83,7 @@ export async function compileForSsr(
   outPath: string,
   addLinkTag: boolean,
   compilePath: string,
+  componentPath: string,
 ) {
   let originalSource = readFileSync(inPath, "utf8");
 
@@ -120,6 +121,7 @@ export async function compileForSsr(
       modernAst: true,
     },
     outPath.replace(compilePath, ""),
+    componentPath,
   );
 
   return new Promise<boolean>((resolve) => {

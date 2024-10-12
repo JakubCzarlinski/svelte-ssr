@@ -10,11 +10,7 @@ import {
 import { cwd } from "node:process";
 import path from "path";
 import type { Config } from "tailwindcss";
-import {
-  compileForSsr,
-  renderCompiled,
-  setPreprocessorConfig,
-} from "./ssr.ts";
+import { compileForSsr, renderCompiled, setPreprocessorConfig } from "./ssr.ts";
 
 export type Args = {
   componentPath: string;
@@ -114,7 +110,15 @@ function compileAll(
     const filenameWitoutExt = file.split(".")[0];
     const filePath = componentPath + file;
     const outFilename = compilePath + filenameWitoutExt + ".js";
-    promiseArray.push(compileForSsr(filePath, outFilename, true, compilePath));
+    promiseArray.push(
+      compileForSsr(
+        filePath,
+        outFilename,
+        true,
+        compilePath,
+        componentPath.slice(2),
+      ),
+    );
   }
   return Promise.all(promiseArray);
 }
