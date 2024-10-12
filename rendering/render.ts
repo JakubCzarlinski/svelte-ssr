@@ -90,13 +90,31 @@ function renderAll(svelteFiles: string[], compilePath: string) {
   for (let i = 0; i < svelteFiles.length; i++) {
     const outfileWithoutExt = compilePath + svelteFiles[i].split(".")[0];
     promiseArray.push(
-      renderCompiled(outfileWithoutExt + ".js").then((rendered) => {
-        writeFile(outfileWithoutExt + ".html", rendered.html, () => {});
-        writeFile(outfileWithoutExt + ".head", rendered.head, () => {});
+      renderCompiled(outfileWithoutExt + ".js").then(async (rendered) => {
+        await writeRenderedFiles(rendered, outfileWithoutExt);
       }),
     );
   }
   return Promise.all(promiseArray);
+}
+
+function writeRenderedFiles(
+  rendered: { html: string; head: string },
+  outfileWithoutExt: string,
+) {
+  let done = 0;
+  const onDone = (resolve: (value: boolean | PromiseLike<boolean>) => void) => {
+    done++;
+    if (done === 2) return resolve(true);
+  };
+  return new Promise<boolean>((resolve) => {
+    writeFile(outfileWithoutExt + ".html", rendered.html, () =>
+      onDone(resolve),
+    );
+    writeFile(outfileWithoutExt + ".head", rendered.head, () =>
+      onDone(resolve),
+    );
+  });
 }
 
 function compileAll(
