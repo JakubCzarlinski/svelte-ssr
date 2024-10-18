@@ -83,23 +83,23 @@ export async function compileForSsr(
   outPath: string,
   addLinkTag: boolean,
   compilePath: string,
-  componentPath: string,
+  componentPath: string
 ) {
   let originalSource = readFileSync(inPath, "utf8");
 
   if (addLinkTag) {
     const headTag = originalSource.match(svelteHeadTagRegex);
     const linkTag = `<link rel="modulepreload" as="script" href="/assets/${path.basename(
-      outPath,
+      outPath
     )}"/>`;
     if (headTag) {
       originalSource = originalSource.replace(
         headTag[0],
-        `${headTag[0]}\n${linkTag}`,
+        `${headTag[0]}\n${linkTag}`
       );
     } else {
       originalSource = originalSource.concat(
-        `<svelte:head>${linkTag}</svelte:head>`,
+        `<svelte:head>${linkTag}</svelte:head>`
       );
     }
   }
@@ -108,7 +108,7 @@ export async function compileForSsr(
   const { code }: Processed = await preprocess(
     originalSource,
     getPreprocessorConfig(),
-    { filename: localFilename },
+    { filename: localFilename }
   );
 
   const { js }: CompileResult = compileSvelte(
@@ -121,7 +121,7 @@ export async function compileForSsr(
       modernAst: true,
     },
     outPath.replace(compilePath, ""),
-    componentPath,
+    componentPath
   );
 
   return new Promise<boolean>((resolve) => {
@@ -132,6 +132,8 @@ export async function compileForSsr(
 
 const headTagRegex = /<[^>]+>/g;
 const htmlCommentRegex = /<!--[\s\S]*?-->/g;
+const svelteComponentLink =
+  /<link rel="modulepreload" as="script" href="\/assets\/(.*?).js">/gm;
 
 export async function renderCompiled(jsFile: string) {
   const Component = (await import(path.join(process.cwd(), jsFile))).default;
@@ -149,6 +151,9 @@ export async function renderCompiled(jsFile: string) {
     headTags.add(match[0]);
   }
   rendered.head = Array.from(headTags).join("\n");
+
+  // Remove the link tag that will be added by the server.
+  rendered.html = rendered.html.replaceAll(svelteComponentLink, "");
 
   return rendered;
 }
