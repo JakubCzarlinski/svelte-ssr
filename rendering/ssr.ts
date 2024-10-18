@@ -93,10 +93,7 @@ export async function compileForSsr(
       outPath
     )}"/>`;
     if (headTag) {
-      originalSource = originalSource.replace(
-        headTag[0],
-        `${headTag[0]}\n${linkTag}`
-      );
+      originalSource = originalSource.replace(headTag[1], headTag[1] + linkTag);
     } else {
       originalSource = originalSource.concat(
         `<svelte:head>${linkTag}</svelte:head>`
@@ -132,8 +129,6 @@ export async function compileForSsr(
 
 const headTagRegex = /<[^>]+>/g;
 const htmlCommentRegex = /<!--[\s\S]*?-->/g;
-const svelteComponentLink =
-  /<link rel="modulepreload" as="script" href="\/assets\/(.*?).js">/gm;
 
 export async function renderCompiled(jsFile: string) {
   const Component = (await import(path.join(process.cwd(), jsFile))).default;
@@ -151,9 +146,6 @@ export async function renderCompiled(jsFile: string) {
     headTags.add(match[0]);
   }
   rendered.head = Array.from(headTags).join("\n");
-
-  // Remove the link tag that will be added by the server.
-  rendered.html = rendered.html.replaceAll(svelteComponentLink, "");
 
   return rendered;
 }
