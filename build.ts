@@ -3,7 +3,8 @@ await Bun.build({
   outdir: "./dist",
   minify: true,
   target: "bun",
-  packages: "external",
+  packages: "bundle",
   sourcemap: "none",
   define: { "process.env.CSS_TRANSFORMER_WASM": "false" },
+  external: ["vite"],
 });

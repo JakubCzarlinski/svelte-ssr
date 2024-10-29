@@ -7,7 +7,6 @@ import {
   rmdirSync,
   writeFile,
 } from "fs";
-import { cwd } from "node:process";
 import path from "path";
 import type { Config } from "tailwindcss";
 import { compileForSsr, renderCompiled, setPreprocessorConfig } from "./ssr.ts";
@@ -37,7 +36,7 @@ export async function main({
 }: Args) {
   // Set the process location to where the file was called from
   const loadConfig = new Promise((resolve: (config: Config) => void) => {
-    import(path.join(cwd(), tailwindConfig)).then((config) => {
+    import(path.join(process.cwd(), tailwindConfig)).then((config) => {
       resolve(config.default as Config);
     });
   });
@@ -74,7 +73,7 @@ export async function main({
       new Promise((resolve) => {
         copyFileSync(`${componentPath}${file}`, `${compilePath}${file}`);
         resolve(true);
-      }),
+      })
     );
   }
   await Promise.all(fileCopies);
@@ -92,7 +91,7 @@ function renderAll(svelteFiles: string[], compilePath: string) {
     promiseArray.push(
       renderCompiled(outfileWithoutExt + ".js").then(async (rendered) => {
         await writeRenderedFiles(rendered, outfileWithoutExt);
-      }),
+      })
     );
   }
   return Promise.all(promiseArray);
@@ -100,7 +99,7 @@ function renderAll(svelteFiles: string[], compilePath: string) {
 
 function writeRenderedFiles(
   rendered: { html: string; head: string },
-  outfileWithoutExt: string,
+  outfileWithoutExt: string
 ) {
   let done = 0;
   const onDone = (resolve: (value: boolean | PromiseLike<boolean>) => void) => {
@@ -109,10 +108,10 @@ function writeRenderedFiles(
   };
   return new Promise<boolean>((resolve) => {
     writeFile(outfileWithoutExt + ".html", rendered.html, () =>
-      onDone(resolve),
+      onDone(resolve)
     );
     writeFile(outfileWithoutExt + ".head", rendered.head, () =>
-      onDone(resolve),
+      onDone(resolve)
     );
   });
 }
@@ -120,7 +119,7 @@ function writeRenderedFiles(
 function compileAll(
   svelteFiles: string[],
   componentPath: string,
-  compilePath: string,
+  compilePath: string
 ) {
   const promiseArray: Promise<boolean>[] = [];
   for (let i = 0; i < svelteFiles.length; i++) {
@@ -134,8 +133,8 @@ function compileAll(
         outFilename,
         true,
         compilePath,
-        componentPath.slice(2),
-      ),
+        componentPath.slice(2)
+      )
     );
   }
   return Promise.all(promiseArray);

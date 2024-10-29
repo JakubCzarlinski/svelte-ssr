@@ -1,8 +1,6 @@
 // @ts-ignore
 import commandLineArgs from "command-line-args";
-import { chdir, cwd } from 'node:process';
 import { main, type Args } from "./render.ts";
-
 
 type OptionDefinition = {
   name: string;
@@ -44,6 +42,6 @@ const optionDefinitions: OptionDefinition[] = [
 
 const options: Args = commandLineArgs(optionDefinitions);
 
-chdir(cwd());
+process.chdir(process.cwd());
 
 main(options);

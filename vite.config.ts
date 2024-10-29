@@ -11,13 +11,13 @@ export default defineConfig({
   build: {
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, 'rendering/main.ts'),
-      name: 'SvelteSSR',
-      fileName: 'svelte-ssr',
+      entry: resolve(__dirname, "rendering/main.ts"),
+      name: "SvelteSSR",
+      fileName: "svelte-ssr",
     },
     target: "node",
     rollupOptions: {
-      external: ["svelte", "svelte/compiler", "svelte/internal", "fsevents"],
-    }
+      external: ["fsevents"],
+    },
   },
 });

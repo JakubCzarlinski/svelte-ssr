@@ -25,7 +25,7 @@ export function compileSvelte(
   source: string,
   options: CompileOptions,
   localPath: string,
-  componentPath: string,
+  componentPath: string
 ): CompileResult {
   reset_warning_filter(options.warningFilter);
   const validated = validate_component_options(options, "");
@@ -88,7 +88,7 @@ function to_public_ast(ast: any) {
 function replaceImports(
   ast: any,
   localPath: string,
-  componentPath: string,
+  componentPath: string
 ): any {
   return estree_walk(ast, {
     // @ts-ignore
@@ -106,9 +106,9 @@ function replaceImports(
                 filepath,
                 localPath,
                 "js",
-                componentPath,
+                componentPath
               );
-            },
+            }
           );
           node.source.raw = node.source.raw.replace(
             importFormat,
@@ -117,9 +117,9 @@ function replaceImports(
                 filepath,
                 localPath,
                 "js",
-                componentPath,
+                componentPath
               );
-            },
+            }
           );
 
           node.source.value = node.source.value.replace(
@@ -129,9 +129,9 @@ function replaceImports(
                 filepath,
                 localPath,
                 ext,
-                componentPath,
+                componentPath
               );
-            },
+            }
           );
           node.source.raw = node.source.raw.replace(
             importFormatKeepExt,
@@ -140,9 +140,9 @@ function replaceImports(
                 filepath,
                 localPath,
                 ext,
-                componentPath,
+                componentPath
               );
-            },
+            }
           );
         } else {
           const resolved = require.resolve(node.source.value, {
@@ -164,7 +164,7 @@ function formatRelativePath(
   filepath: string,
   localPath: string,
   ext: string,
-  componentPath: string,
+  componentPath: string
 ) {
   const relativePath = path
     .relative(path.dirname(localPath), path.join(filepath))

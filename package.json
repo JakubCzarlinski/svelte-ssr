@@ -1,7 +1,7 @@
 {
   "name": "svelte-ssr",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,6 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@sveltejs/vite-plugin-svelte": "^4.0.0-next.7",
     "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^22.4.0",
     "autoprefixer": "^10.4.20",
     "command-line-args": "^6.0.0",
     "postcss": "^8.4.41",
