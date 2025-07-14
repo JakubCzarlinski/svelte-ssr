@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"svelte-ssr/src/render"
-
-	"flag"
+	"time"
 )
 
 var callFromPath string
@@ -84,46 +84,50 @@ func init() {
 }
 
 func main() {
-	renderConfig := render.RenderConfig{
+	startTime := time.Now()
+	// Check if the directories are valid.
+	if err := validateDir(callFromPath, "call from"); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	if err := os.Chdir(callFromPath); err != nil {
+		fmt.Printf("Could not change directory to %s: %v.\n", callFromPath, err.Error())
+		os.Exit(1)
+	}
+
+	if err := validateDir(componentPath, "input"); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	if err := validateFile(tailwindConfig, "tailwind config"); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	if clean {
+		if err := os.RemoveAll(compilePath); err != nil {
+			fmt.Printf("Could not clean compile path %s: %v.\n", compilePath, err.Error())
+			os.Exit(1)
+		}
+	}
+	if err := os.MkdirAll(compilePath, 0755); err != nil {
+		fmt.Printf("Could not create compile path %s: %v.\n", compilePath, err.Error())
+		os.Exit(1)
+	}
+
+	if err := render.Render(&render.RenderConfig{
 		ComponentPath:  componentPath,
 		CompilePath:    compilePath,
 		TailwindConfig: tailwindConfig,
 		CallFromPath:   callFromPath,
 		Clean:          clean,
-	}
-
-	// Check if the directories are valid.
-	if err := validateDir(renderConfig.CallFromPath, "call from"); err != nil {
-		fmt.Println(err.Error())
+	}); err != nil {
+		fmt.Printf("Rendering failed: %v\n", err)
 		os.Exit(1)
 	}
-
-	if err := os.Chdir(renderConfig.CallFromPath); err != nil {
-		fmt.Printf("Could not change directory to %s: %v.\n", renderConfig.CallFromPath, err.Error())
-		os.Exit(1)
-	}
-
-	if err := validateDir(renderConfig.ComponentPath, "input"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	if err := validateDir(renderConfig.TailwindConfig, "tailwind config"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	if renderConfig.Clean {
-		if err := os.RemoveAll(renderConfig.CompilePath); err != nil {
-			fmt.Printf("Could not clean compile path %s: %v.\n", renderConfig.CompilePath, err.Error())
-			os.Exit(1)
-		}
-	}
-	if err := os.MkdirAll(renderConfig.CompilePath, 0755); err != nil {
-		fmt.Printf("Could not create compile path %s: %v.\n", renderConfig.CompilePath, err.Error())
-		os.Exit(1)
-	}
-	render.Render(&renderConfig)
+	fmt.Printf("Rendering completed in %s.\n", time.Since(startTime))
 }
 
 func validateDir(path string, name string) error {

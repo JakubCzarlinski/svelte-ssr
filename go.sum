@@ -1,0 +1,4 @@
+github.com/JakubCzarlinski/go-pooling v1.0.1 h1:jdqSTCHQ5dVtgM4TxNnqxATMwtQhEDabeK2iaPe5ScI=
+github.com/JakubCzarlinski/go-pooling v1.0.1/go.mod h1:9Eg6BwQ+2BF9bak0d7afmG8wiraGFqP4s0igMXr2Ehs=
+golang.org/x/sync v0.16.0 h1:ycBJEhp9p4vXvUZNszeOq0kGTPghopOL8q0fq3vstxw=
+golang.org/x/sync v0.16.0/go.mod h1:1dzgHSNfp02xaA81J2MS99Qcpr2w7fw1gpm99rleRqA=
