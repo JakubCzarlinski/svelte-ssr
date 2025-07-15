@@ -1,11 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"svelte-ssr/src/render"
-	"time"
 )
 
 var callFromPath string
@@ -80,54 +81,67 @@ func init() {
 		}
 	}
 	flag.Parse()
-	// Make sure that only one of each command is set.
 }
 
-func main() {
-	startTime := time.Now()
+func execute() error {
 	// Check if the directories are valid.
 	if err := validateDir(callFromPath, "call from"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("Could not validate call from path: %v", err)
 	}
-
 	if err := os.Chdir(callFromPath); err != nil {
-		fmt.Printf("Could not change directory to %s: %v.\n", callFromPath, err.Error())
-		os.Exit(1)
+		return fmt.Errorf("Could not change directory to %s: %v", callFromPath, err)
 	}
-
 	if err := validateDir(componentPath, "input"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("Could not validate component path: %v", err)
 	}
-
 	if err := validateFile(tailwindConfig, "tailwind config"); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("Could not validate tailwind config path: %v", err)
 	}
 
 	if clean {
 		if err := os.RemoveAll(compilePath); err != nil {
-			fmt.Printf("Could not clean compile path %s: %v.\n", compilePath, err.Error())
-			os.Exit(1)
+			return fmt.Errorf("Could not clean compile path %s: %v", compilePath, err)
 		}
 	}
 	if err := os.MkdirAll(compilePath, 0755); err != nil {
-		fmt.Printf("Could not create compile path %s: %v.\n", compilePath, err.Error())
-		os.Exit(1)
+		return fmt.Errorf("Could not create compile path %s: %v", compilePath, err)
 	}
 
-	if err := render.Render(&render.RenderConfig{
+	// Create a .temp directory in the compile path.
+	tempDir := path.Join(compilePath, ".cache")
+	if err := os.MkdirAll(tempDir, 0755); err != nil {
+		return fmt.Errorf("Could not create temporary directory %s: %v", tempDir, err)
+	}
+
+	config := &render.RenderConfig{
 		ComponentPath:  componentPath,
 		CompilePath:    compilePath,
 		TailwindConfig: tailwindConfig,
 		CallFromPath:   callFromPath,
 		Clean:          clean,
-	}); err != nil {
-		fmt.Printf("Rendering failed: %v\n", err)
+	}
+
+	// Save the config to a file for debugging purposes.
+	b, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return fmt.Errorf("Could not marshal config: %v", err)
+	}
+	if err := os.WriteFile(path.Join(tempDir, "config.json"), b, 0644); err != nil {
+		return fmt.Errorf("Could not write config file: %v", err)
+	}
+
+	if err := render.Render(config); err != nil {
+		return fmt.Errorf("Rendering failed: %v", err)
+	}
+	return nil
+}
+
+func main() {
+	if err := execute(); err != nil {
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	fmt.Printf("Rendering completed in %s.\n", time.Since(startTime))
+	os.Exit(0)
 }
 
 func validateDir(path string, name string) error {

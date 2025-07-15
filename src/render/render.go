@@ -58,8 +58,6 @@ func CreateBytesBufferPool(size int) *pooling.Pool[*BytesBuffer, struct{}] {
 }
 
 func Render(config *RenderConfig) error {
-	fmt.Printf("Rendering with config: %s\n", config.String())
-
 	// Read the files and directories in the component path recursively.
 	svelteFiles := []string{}
 	errGroup := &errgroup.Group{}
@@ -106,20 +104,16 @@ func Render(config *RenderConfig) error {
 		return fmt.Errorf("Error during file copy: %w", err)
 	}
 
-	if len(svelteFiles) == 0 {
-		return fmt.Errorf("No .svelte files found in the component path %s", config.ComponentPath)
-	}
-	fmt.Printf("Found %d .svelte files in the component path.\n", len(svelteFiles))
-
-	for _, file := range svelteFiles {
-		fmt.Printf("Processing .svelte file: %s\n", file)
+	svelteOutputFile := path.Join(config.CompilePath, ".cache", "sveltefiles")
+	data := []byte(strings.Join(svelteFiles, "\n") + "\n")
+	if err := os.WriteFile(svelteOutputFile, data, 0644); err != nil {
+		return fmt.Errorf("Could not create temporary .svelte file: %v", err)
 	}
 
 	return nil
 }
 
 func copyFile(config *RenderConfig, filename string) error {
-
 	srcPath := path.Join(config.ComponentPath, filename)
 	destPath := path.Join(config.CompilePath, filename)
 
